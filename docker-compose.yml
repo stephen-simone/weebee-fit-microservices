@@ -1,0 +1,87 @@
+version: "3.8"
+
+services:
+  workout-service:
+    container_name: workout-service
+    build:
+      context: ./workout-service
+    expose:
+      - ${WORKOUT_SERVICE_PORT}
+    volumes:
+      - ./workout-service:/app
+      - /app/node_modules
+    ports:
+      - ${WORKOUT_SERVICE_PORT}:${WORKOUT_SERVICE_PORT}
+    command: yarn start:dev
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    hostname: localhost
+  user-service:
+    container_name: user-service
+    build:
+      context: ./user-service
+    expose:
+      - ${USER_SERVICE_PORT}
+    volumes:
+      - ./user-service:/app
+      - /app/node_modules
+    ports:
+      - ${USER_SERVICE_PORT}:${USER_SERVICE_PORT}
+    command: yarn start:dev
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    hostname: localhost
+  activity-service:
+    container_name: activity-service
+    build:
+      context: ./activity-service
+    expose:
+      - ${ACTIVITY_SERVICE_PORT}
+    volumes:
+      - ./activity-service:/app
+      - /app/node_modules
+    ports:
+      - ${ACTIVITY_SERVICE_PORT}:${ACTIVITY_SERVICE_PORT}
+    command: yarn start:dev
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    hostname: localhost
+  postgres:
+    container_name: postgres
+    hostname: localhost
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_DB: ${DB_NAME}
+      PG_DATA: /data/postgres
+    logging:
+      driver: none
+    ports:
+      - 5432:5432
+    volumes:
+      - pg-dataset:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - "53603:53603"
+      - "80:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      GUNICORN_ACCESS_LOGFILE: '/dev/null'
+    logging:
+      driver: none
+volumes:
+  pg-dataset:
+  pgadmin:
